@@ -1,15 +1,41 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { case0147 } from './data/cases/case0147';
 import type { EvidenceItem } from './types/evidence';
 import { CaseHeader } from './components/CaseHeader';
 import { EvidencePanel } from './components/EvidencePanel';
+import { InvestigationSummary } from './components/InvestigationSummary';
 import { Timeline } from './components/Timeline';
 import { Terminal } from 'lucide-react';
 
+const PERSISTED_PINNED_IDS_KEY = 'digital-forensics-lab:pinned-ids';
+const PERSISTED_NOTES_KEY = 'digital-forensics-lab:notes';
+const PERSISTED_HYPOTHESIS_KEY = 'digital-forensics-lab:hypothesis';
+
 export function App() {
   const [currentCase] = useState(case0147);
-  const [pinnedIds, setPinnedIds] = useState<string[]>([]);
-  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [pinnedIds, setPinnedIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem(PERSISTED_PINNED_IDS_KEY);
+    return saved ? JSON.parse(saved) as string[] : [];
+  });
+  const [notes, setNotes] = useState<Record<string, string>>(() => {
+    const saved = localStorage.getItem(PERSISTED_NOTES_KEY);
+    return saved ? JSON.parse(saved) as Record<string, string> : {};
+  });
+  const [hypothesisText, setHypothesisText] = useState<string>(() => {
+    return localStorage.getItem(PERSISTED_HYPOTHESIS_KEY) ?? '';
+  });
+
+  useEffect(() => {
+    localStorage.setItem(PERSISTED_PINNED_IDS_KEY, JSON.stringify(pinnedIds));
+  }, [pinnedIds]);
+
+  useEffect(() => {
+    localStorage.setItem(PERSISTED_NOTES_KEY, JSON.stringify(notes));
+  }, [notes]);
+
+  useEffect(() => {
+    localStorage.setItem(PERSISTED_HYPOTHESIS_KEY, hypothesisText);
+  }, [hypothesisText]);
 
   // Fast lookup map for evidence
   const evidenceMap = useMemo(() => {
@@ -32,6 +58,16 @@ export function App() {
   // Remove specific pinned item
   const handleRemovePinned = (id: string) => {
     setPinnedIds((prev) => prev.filter((item) => item !== id));
+  };
+
+  const handleClearPinned = () => {
+    setPinnedIds([]);
+  };
+
+  const handleClearInvestigation = () => {
+    setPinnedIds([]);
+    setNotes({});
+    setHypothesisText('');
   };
 
   // Chronological auto-sort based on timestamp
@@ -98,8 +134,20 @@ export function App() {
           evidenceMap={evidenceMap}
           onRemovePinned={handleRemovePinned}
           onAutoSort={handleAutoSort}
+          onClearPinned={handleClearPinned}
         />
       </main>
+
+      <div className="max-w-7xl w-full mx-auto px-4 pb-6 sm:px-6">
+        <InvestigationSummary
+          caseData={currentCase}
+          evidenceMap={evidenceMap}
+          pinnedIds={pinnedIds}
+          hypothesisText={hypothesisText}
+          onHypothesisChange={setHypothesisText}
+          onResetInvestigation={handleClearInvestigation}
+        />
+      </div>
 
       {/* Lab Footer */}
       <footer className="border-t border-cyber-800/80 bg-cyber-900/60 py-3 px-6 text-center text-xs font-mono text-slate-500">
