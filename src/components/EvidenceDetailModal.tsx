@@ -19,11 +19,11 @@ export const EvidenceDetailModal: React.FC<EvidenceDetailModalProps> = ({
   userNote,
   onSaveNote,
 }) => {
-  if (!item) return null;
-
   const [copied, setCopied] = useState(false);
   const [noteText, setNoteText] = useState(userNote || '');
   const [noteSaved, setNoteSaved] = useState(false);
+
+  if (!item) return null;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(item.rawPayload);

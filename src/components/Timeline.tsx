@@ -1,11 +1,12 @@
 import type { EvidenceItem } from '../types/evidence';
-import { Clock, ArrowDown, Trash2, ArrowUpDown, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Clock, ArrowDown, Trash2, ArrowUpDown, AlertCircle, CheckCircle2, ListX } from 'lucide-react';
 
 interface TimelineProps {
   pinnedIds: string[];
   evidenceMap: Map<string, EvidenceItem>;
   onRemovePinned: (id: string) => void;
   onAutoSort: () => void;
+  onClearPinned: () => void;
 }
 
 export const Timeline: React.FC<TimelineProps> = ({
@@ -13,6 +14,7 @@ export const Timeline: React.FC<TimelineProps> = ({
   evidenceMap,
   onRemovePinned,
   onAutoSort,
+  onClearPinned,
 }) => {
   // Convert pinned IDs to evidence items
   const timelineItems = pinnedIds
@@ -42,16 +44,29 @@ export const Timeline: React.FC<TimelineProps> = ({
           </span>
         </div>
 
-        {timelineItems.length > 1 && (
-          <button
-            onClick={onAutoSort}
-            className="flex items-center gap-1 text-[11px] font-mono text-slate-400 hover:text-cyan-300 px-2 py-1 rounded bg-cyber-800 hover:bg-cyber-700 border border-cyber-700 transition-colors"
-            title="Auto sort events chronologically"
-          >
-            <ArrowUpDown className="w-3 h-3" />
-            <span>Sort by Time</span>
-          </button>
-        )}
+        <div className="flex items-center gap-1.5">
+          {timelineItems.length > 1 && (
+            <button
+              onClick={onAutoSort}
+              className="flex items-center gap-1 text-[11px] font-mono text-slate-400 hover:text-cyan-300 px-2 py-1 rounded bg-cyber-800 hover:bg-cyber-700 border border-cyber-700 transition-colors"
+              title="Auto sort events chronologically"
+            >
+              <ArrowUpDown className="w-3 h-3" />
+              <span>Sort</span>
+            </button>
+          )}
+
+          {timelineItems.length > 0 && (
+            <button
+              onClick={onClearPinned}
+              className="flex items-center gap-1 text-[11px] font-mono text-slate-400 hover:text-rose-300 px-2 py-1 rounded bg-cyber-800 hover:bg-cyber-700 border border-cyber-700 transition-colors"
+              title="Clear timeline"
+            >
+              <ListX className="w-3 h-3" />
+              <span>Clear</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Body / Timeline Nodes */}
