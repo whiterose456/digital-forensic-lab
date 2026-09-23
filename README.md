@@ -1,5 +1,6 @@
 # Digital Forensics Lab
-#project 12 for the hackathon
+#project 12 for the hackathon stuff
+
 
 A compact React + TypeScript investigation simulator for exploring a fictional cyber incident. Analysts can browse forensic evidence, tag suspicious events to an incident timeline, save notes, and validate whether they reconstructed the correct compromise chain.
 
