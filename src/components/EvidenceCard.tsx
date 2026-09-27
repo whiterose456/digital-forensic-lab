@@ -1,4 +1,5 @@
 import type { EvidenceItem } from '../types/evidence';
+import type { AnomalyScore } from '../types/analysis';
 import { 
   Key, 
   FileCode, 
@@ -9,7 +10,9 @@ import {
   Check, 
   Code2, 
   MessageSquare,
-  ArrowRight
+  ArrowRight,
+  AlertTriangle,
+  AlertCircle
 } from 'lucide-react';
 
 interface EvidenceCardProps {
@@ -19,6 +22,7 @@ interface EvidenceCardProps {
   onInspect: (item: EvidenceItem) => void;
   userNote?: string;
   onEditNote?: (id: string) => void;
+  anomalyScore?: AnomalyScore;
 }
 
 export const EvidenceCard: React.FC<EvidenceCardProps> = ({
@@ -28,7 +32,43 @@ export const EvidenceCard: React.FC<EvidenceCardProps> = ({
   onInspect,
   userNote,
   onEditNote,
+  anomalyScore,
 }) => {
+  const getAnomalyBadgeConfig = (severity: string) => {
+    switch (severity) {
+      case 'critical':
+        return {
+          color: 'bg-red-500/20 border-red-500/40 text-red-300',
+          icon: <AlertTriangle className="w-3.5 h-3.5 text-red-400" />,
+          label: 'CRITICAL',
+        };
+      case 'high':
+        return {
+          color: 'bg-orange-500/20 border-orange-500/40 text-orange-300',
+          icon: <AlertTriangle className="w-3.5 h-3.5 text-orange-400" />,
+          label: 'HIGH',
+        };
+      case 'medium':
+        return {
+          color: 'bg-yellow-500/20 border-yellow-500/40 text-yellow-300',
+          icon: <AlertCircle className="w-3.5 h-3.5 text-yellow-400" />,
+          label: 'MEDIUM',
+        };
+      case 'low':
+        return {
+          color: 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300',
+          icon: <AlertCircle className="w-3.5 h-3.5 text-cyan-400" />,
+          label: 'LOW',
+        };
+      default:
+        return {
+          color: 'bg-slate-500/10 border-slate-500/20 text-slate-400',
+          icon: <AlertCircle className="w-3.5 h-3.5 text-slate-400" />,
+          label: 'NORMAL',
+        };
+    }
+  };
+
   const getCategoryConfig = (category: EvidenceItem['category']) => {
     switch (category) {
       case 'AUTH_LOG':
@@ -81,7 +121,7 @@ export const EvidenceCard: React.FC<EvidenceCardProps> = ({
       }`}
     >
       <div className="p-4 flex flex-col justify-between h-full">
-        {/* Top bar: Category + Timestamp + ID + Actions */}
+        {/* Top bar: Category + Timestamp + Anomaly + ID + Actions */}
         <div className="flex items-center justify-between gap-2 mb-2.5">
           <div className="flex items-center gap-2">
             <span className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider border ${config.color}`}>
@@ -91,6 +131,25 @@ export const EvidenceCard: React.FC<EvidenceCardProps> = ({
             <span className="font-mono text-xs text-cyan-300 font-bold tracking-tight bg-cyber-950/80 px-2 py-0.5 rounded border border-cyber-700/50">
               {item.timestamp}
             </span>
+            
+            {/* Anomaly Score Badge */}
+            {anomalyScore && anomalyScore.severity !== 'normal' && (
+              <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider border group/anomaly cursor-help transition-all ${getAnomalyBadgeConfig(anomalyScore.severity).color}`}>
+                {getAnomalyBadgeConfig(anomalyScore.severity).icon}
+                <span>{Math.round(anomalyScore.score * 100)}</span>
+                
+                {/* Tooltip */}
+                <div className="invisible group-hover/anomaly:visible absolute top-full left-0 mt-1 p-2 bg-black/90 rounded-lg text-[10px] text-slate-200 whitespace-nowrap font-normal z-20 border border-slate-600">
+                  <div className="font-bold text-yellow-400 mb-1">{getAnomalyBadgeConfig(anomalyScore.severity).label} ANOMALY</div>
+                  {anomalyScore.reasons.slice(0, 2).map((reason, idx) => (
+                    <div key={idx} className="text-slate-300 mb-0.5 leading-tight max-w-xs">
+                      • {reason}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             <span className="text-[10px] font-mono text-slate-500">
               #{item.id}
             </span>

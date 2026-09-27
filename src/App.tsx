@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { case0147 } from './data/cases/case0147';
+import { scoreAllEvidence } from './lib/anomaly-detection';
 import type { EvidenceItem } from './types/evidence';
 import { CaseHeader } from './components/CaseHeader';
 import { EvidencePanel } from './components/EvidencePanel';
@@ -24,6 +25,11 @@ export function App() {
   const [hypothesisText, setHypothesisText] = useState<string>(() => {
     return localStorage.getItem(PERSISTED_HYPOTHESIS_KEY) ?? '';
   });
+  
+  // Compute anomaly scores for all evidence
+  const anomalyScores = useMemo(() => {
+    return scoreAllEvidence(currentCase.evidence);
+  }, [currentCase.evidence]);
 
   useEffect(() => {
     localStorage.setItem(PERSISTED_PINNED_IDS_KEY, JSON.stringify(pinnedIds));
@@ -126,6 +132,7 @@ export function App() {
           onTogglePin={handleTogglePin}
           notes={notes}
           onSaveNote={handleSaveNote}
+          anomalyScores={anomalyScores}
         />
 
         {/* Right: Interactive Incident Timeline */}

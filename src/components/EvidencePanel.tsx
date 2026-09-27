@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import type { EvidenceItem, EvidenceCategory } from '../types/evidence';
+import type { AnomalyScore } from '../types/analysis';
 import { EvidenceCard } from './EvidenceCard';
 import { EvidenceFilters } from './EvidenceFilters';
 import { EvidenceDetailModal } from './EvidenceDetailModal';
@@ -11,6 +12,7 @@ interface EvidencePanelProps {
   onTogglePin: (id: string) => void;
   notes: Record<string, string>;
   onSaveNote: (evidenceId: string, note: string) => void;
+  anomalyScores?: Map<string, AnomalyScore>;
 }
 
 export const EvidencePanel: React.FC<EvidencePanelProps> = ({
@@ -19,6 +21,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
   onTogglePin,
   notes,
   onSaveNote,
+  anomalyScores,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<EvidenceCategory | 'ALL'>('ALL');
@@ -106,6 +109,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
               onInspect={setInspectingItem}
               userNote={notes[item.id]}
               onEditNote={() => setInspectingItem(item)}
+              anomalyScore={anomalyScores?.get(item.id)}
             />
           ))}
         </div>
